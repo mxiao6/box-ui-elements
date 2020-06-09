@@ -77,4 +77,24 @@ const formatTaggedMessage = (
     return shouldReturnString ? contentItems.join('') : contentItems;
 };
 
+export const getUrlsFromMessage = (tagged_message: string): string[] => {
+    return tagged_message
+        .split(splitRegex)
+        .map((text: string) => {
+            // attempt url match
+            // NOTE: There are useless escapes in the regex below, should probably remove them when safe
+            const urlMatch = text.match(
+                // eslint-disable-next-line no-useless-escape
+                /((?:(?:ht|f)tps?:\/\/)[\w\._\-]+(?::\d+)?(?:\/[\w\-_\.~\+\/#\?&%=:\[\]@!$'\(\)\*;,]*)?)/i,
+            );
+            if (urlMatch) {
+                const [, url] = urlMatch;
+                return url;
+            }
+
+            return '';
+        })
+        .filter(url => !!url);
+};
+
 export default formatTaggedMessage;

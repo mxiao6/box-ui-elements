@@ -1,12 +1,20 @@
 // @flow
 import * as React from 'react';
+import axios from 'axios';
 import noop from 'lodash/noop';
 import LoadingIndicator from '../../../../../components/loading-indicator';
-import formatTaggedMessage from '../../utils/formatTaggedMessage';
+import formatTaggedMessage, { getUrlsFromMessage } from '../../utils/formatTaggedMessage';
 import ShowOriginalButton from './ShowOriginalButton';
 import TranslateButton from './TranslateButton';
 import type { GetProfileUrlCallback } from '../../../../common/flowTypes';
 import './ActivityMessage.scss';
+
+type LinkPreviewItem = {
+    description: string,
+    domain: string,
+    img: string,
+    title: string,
+};
 
 type Props = {
     getUserProfileUrl?: GetProfileUrlCallback,
@@ -21,6 +29,7 @@ type Props = {
 type State = {
     isLoading?: boolean,
     isTranslation?: boolean,
+    linkPreviewItems?: LinkPreviewItem[],
 };
 
 class ActivityMessage extends React.Component<Props, State> {
@@ -28,10 +37,16 @@ class ActivityMessage extends React.Component<Props, State> {
         translationEnabled: false,
     };
 
-    state = {
-        isLoading: false,
-        isTranslation: false,
-    };
+    constructor(props: Props) {
+        super(props);
+
+        this.state = {
+            isLoading: false,
+            isTranslation: false,
+        };
+
+        this.getUrlPreview(props.tagged_message);
+    }
 
     componentDidUpdate(prevProps: Props): void {
         const { translatedTaggedMessage, translationFailed } = this.props;
@@ -45,6 +60,20 @@ class ActivityMessage extends React.Component<Props, State> {
             this.setState({ isLoading: false });
         }
     }
+
+    getUrlPreview = (taggedMessage: string): void => {
+        axios
+            .get('https://us-central1-lofty-totality-204620.cloudfunctions.net/link-preview-hackathon', {
+                params: {
+                    q: getUrlsFromMessage(taggedMessage).join(','),
+                },
+            })
+            .then(res => {
+                this.setState({
+                    linkPreviewItems: res.data,
+                });
+            });
+    };
 
     getButton(isTranslation?: boolean): React.Node {
         let button = null;
@@ -75,7 +104,7 @@ class ActivityMessage extends React.Component<Props, State> {
 
     render(): React.Node {
         const { id, tagged_message, translatedTaggedMessage, translationEnabled, getUserProfileUrl } = this.props;
-        const { isLoading, isTranslation } = this.state;
+        const { isLoading, isTranslation, linkPreviewItems } = this.state;
         const commentToDisplay =
             translationEnabled && isTranslation && translatedTaggedMessage ? translatedTaggedMessage : tagged_message;
         return isLoading ? (
@@ -86,6 +115,7 @@ class ActivityMessage extends React.Component<Props, State> {
             <div className="bcs-ActivityMessage">
                 {formatTaggedMessage(commentToDisplay, id, false, getUserProfileUrl)}
                 {translationEnabled ? this.getButton(isTranslation) : null}
+                {linkPreviewItems && <div>{JSON.stringify(linkPreviewItems)}</div>}
             </div>
         );
     }
