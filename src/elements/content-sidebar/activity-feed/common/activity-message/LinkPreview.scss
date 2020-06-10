@@ -1,0 +1,17 @@
+@import '../../../../../styles/variables';
+
+.LinkPreview {
+    margin: 1rem 0;
+}
+
+.LinkPreview-title {
+    margin-bottom: .875rem;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.LinkPreview-image {
+    .img {
+        width: 48px;
+    }
+}

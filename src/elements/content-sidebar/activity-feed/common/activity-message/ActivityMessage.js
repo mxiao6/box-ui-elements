@@ -6,6 +6,7 @@ import LoadingIndicator from '../../../../../components/loading-indicator';
 import formatTaggedMessage, { getUrlsFromMessage } from '../../utils/formatTaggedMessage';
 import ShowOriginalButton from './ShowOriginalButton';
 import TranslateButton from './TranslateButton';
+import LinkPreview from './LinkPreview';
 import type { GetProfileUrlCallback } from '../../../../common/flowTypes';
 import './ActivityMessage.scss';
 
@@ -13,6 +14,7 @@ type LinkPreviewItem = {
     description: string,
     domain: string,
     img: string,
+    link: string,
     title: string,
 };
 
@@ -115,7 +117,7 @@ class ActivityMessage extends React.Component<Props, State> {
             <div className="bcs-ActivityMessage">
                 {formatTaggedMessage(commentToDisplay, id, false, getUserProfileUrl)}
                 {translationEnabled ? this.getButton(isTranslation) : null}
-                {linkPreviewItems && <div>{JSON.stringify(linkPreviewItems)}</div>}
+                {linkPreviewItems && linkPreviewItems.map((link, index) => <LinkPreview key={index} {...link} />)}
             </div>
         );
     }
