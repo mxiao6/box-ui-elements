@@ -13,9 +13,6 @@ type LinkPreviewProps = {
 };
 const LinkPreview = (props: LinkPreviewProps) => (
     <Media className="LinkPreview">
-        <Media.Figure className="LinkPreview-image">
-            <img src={props.img} alt={props.title} width={48} />
-        </Media.Figure>
         <Media.Body>
             <span className="LinkPreview-title">
                 <a href={props.link} rel="noopener noreferrer" target="_blank">
@@ -24,6 +21,9 @@ const LinkPreview = (props: LinkPreviewProps) => (
             </span>
             <p>{props.description}</p>
         </Media.Body>
+        <Media.Figure className="LinkPreview-image">
+            <img src={props.img} alt={props.title} width={48} />
+        </Media.Figure>
     </Media>
 );
 
