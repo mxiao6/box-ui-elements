@@ -31,7 +31,6 @@ type Props = {
 type State = {
     isLoading?: boolean,
     isTranslation?: boolean,
-    linkPreviewError?: string,
     linkPreviewItems?: LinkPreviewItem[],
 };
 
@@ -44,7 +43,6 @@ class ActivityMessage extends React.Component<Props, State> {
         isLoading: false,
         isTranslation: false,
         linkPreviewItems: undefined,
-        linkPreviewError: undefined,
     };
 
     componentDidMount(): void {
@@ -76,12 +74,12 @@ class ActivityMessage extends React.Component<Props, State> {
                         q: urls.join(','),
                     },
                 })
-                .then(res => {
+                .then(response => {
                     this.setState({
-                        linkPreviewItems: res.data,
+                        linkPreviewItems: response.data,
                     });
                 })
-                .catch(err => this.setState({ linkPreviewError: err.response.data.error }));
+                .catch(() => this.setState({ linkPreviewItems: [] }));
         } else {
             this.setState({
                 linkPreviewItems: [],
@@ -118,7 +116,7 @@ class ActivityMessage extends React.Component<Props, State> {
 
     render(): React.Node {
         const { id, tagged_message, translatedTaggedMessage, translationEnabled, getUserProfileUrl } = this.props;
-        const { isLoading, isTranslation, linkPreviewError, linkPreviewItems } = this.state;
+        const { isLoading, isTranslation, linkPreviewItems } = this.state;
         const commentToDisplay =
             translationEnabled && isTranslation && translatedTaggedMessage ? translatedTaggedMessage : tagged_message;
         return isLoading ? (
@@ -130,9 +128,7 @@ class ActivityMessage extends React.Component<Props, State> {
                 {formatTaggedMessage(commentToDisplay, id, false, getUserProfileUrl)}
                 {translationEnabled ? this.getButton(isTranslation) : null}
                 {linkPreviewItems ? (
-                    linkPreviewItems.map((link, index) => (
-                        <LinkPreview key={index} {...link} error={linkPreviewError} />
-                    ))
+                    linkPreviewItems.map((link, index) => <LinkPreview key={index} {...link} />)
                 ) : (
                     <LoadingIndicator className="bcs-ActivityMessage-linkLoading" />
                 )}

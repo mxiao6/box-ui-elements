@@ -1,24 +1,21 @@
 // @flow
 import React from 'react';
 import Media from '../../../../../components/media/Media';
-import InlineError from '../../../../../components/inline-error/InlineError';
 
 import './LinkPreview.scss';
 
 type LinkPreviewProps = {
     description: string,
     domain: string,
-    error?: string,
     img: string,
     link: string,
     title: string,
 };
+
 const LinkPreview = (props: LinkPreviewProps) => {
-    return props.error ? (
-        <InlineError title="Uh Oh">
-            <p>{props.error}</p>
-        </InlineError>
-    ) : (
+    const [errored, setErrored] = React.useState(false);
+
+    return (
         <Media className="LinkPreview">
             <Media.Body>
                 <span className="LinkPreview-title">
@@ -28,9 +25,11 @@ const LinkPreview = (props: LinkPreviewProps) => {
                 </span>
                 <p>{props.description}</p>
             </Media.Body>
-            <Media.Figure className="LinkPreview-image">
-                <img src={props.img} alt={props.title} width={48} />
-            </Media.Figure>
+            {!!props.img && !errored && (
+                <Media.Figure className="LinkPreview-image">
+                    <img src={props.img} alt={props.title} width={48} onError={() => setErrored(true)} />
+                </Media.Figure>
+            )}
         </Media>
     );
 };
