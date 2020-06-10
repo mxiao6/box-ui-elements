@@ -39,15 +39,16 @@ class ActivityMessage extends React.Component<Props, State> {
         translationEnabled: false,
     };
 
-    constructor(props: Props) {
-        super(props);
+    state = {
+        isLoading: false,
+        isTranslation: false,
+        linkPreviewItems: undefined,
+    };
 
-        this.state = {
-            isLoading: false,
-            isTranslation: false,
-        };
+    componentDidMount(): void {
+        const { tagged_message: taggedMessage } = this.props;
 
-        this.getUrlPreview(props.tagged_message);
+        this.getUrlPreview(taggedMessage);
     }
 
     componentDidUpdate(prevProps: Props): void {
@@ -64,17 +65,25 @@ class ActivityMessage extends React.Component<Props, State> {
     }
 
     getUrlPreview = (taggedMessage: string): void => {
-        axios
-            .get('https://us-central1-lofty-totality-204620.cloudfunctions.net/link-preview-hackathon', {
-                params: {
-                    q: getUrlsFromMessage(taggedMessage).join(','),
-                },
-            })
-            .then(res => {
-                this.setState({
-                    linkPreviewItems: res.data,
+        const urls = getUrlsFromMessage(taggedMessage);
+
+        if (urls.length) {
+            axios
+                .get('https://us-central1-lofty-totality-204620.cloudfunctions.net/link-preview-hackathon', {
+                    params: {
+                        q: urls.join(','),
+                    },
+                })
+                .then(res => {
+                    this.setState({
+                        linkPreviewItems: res.data,
+                    });
                 });
+        } else {
+            this.setState({
+                linkPreviewItems: [],
             });
+        }
     };
 
     getButton(isTranslation?: boolean): React.Node {
@@ -117,7 +126,11 @@ class ActivityMessage extends React.Component<Props, State> {
             <div className="bcs-ActivityMessage">
                 {formatTaggedMessage(commentToDisplay, id, false, getUserProfileUrl)}
                 {translationEnabled ? this.getButton(isTranslation) : null}
-                {linkPreviewItems && linkPreviewItems.map((link, index) => <LinkPreview key={index} {...link} />)}
+                {linkPreviewItems ? (
+                    linkPreviewItems.map((link, index) => <LinkPreview key={index} {...link} />)
+                ) : (
+                    <LoadingIndicator className="bcs-ActivityMessage-linkLoading" />
+                )}
             </div>
         );
     }
